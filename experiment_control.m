@@ -111,7 +111,7 @@ save(strcat(folder_name, '/psychophysics.mat'), 'percentage');
 [~, idx] = min(abs(percentage - 0.5));
 threshold = freq(idx);
 plot(freq, percentage, '-*');
-fprintf('The threshold frequency is %d', threshold);
+fprintf('The threshold frequency is %d\n', threshold);
 
 fprintf('hit enter to continue to Sensory feedback\n');
 pause;
