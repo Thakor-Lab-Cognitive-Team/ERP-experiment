@@ -33,17 +33,17 @@ if exist('stimulator', 'var') == 0
 end
 
 
-% if exist('sensor', 'var') == 0
-%     sensor = serialport('/dev/cu.usbmodem142401', 9600);
-%     flush(sensor);
-%     sensor.UserData = struct("data",[],"count", 1);
-%     configureTerminator(sensor, "LF");
-%     configureCallback(sensor, "terminator", @readData);
-%     sensor_out = zeros(1, 3);
-%     sensor_out(1) = 1; % start flag for Arduino
-%     sensor_out(2) = 2500; % length of sampling in millisec
-%     sensor_out(3) = 100; % sampling_freq
-% end
+if exist('sensor', 'var') == 0
+    sensor = serialport('/dev/cu.usbmodem142401', 9600);
+    flush(sensor);
+    sensor.UserData = struct("data",[],"count", 1);
+    configureTerminator(sensor, "LF");
+    configureCallback(sensor, "terminator", @readData);
+    sensor_out = zeros(1, 3);
+    sensor_out(1) = 1; % start flag for Arduino
+    sensor_out(2) = 2500; % length of sampling in millisec
+    sensor_out(3) = 100; % sampling_freq
+end
 
 if exist('stimulator', 'var') == 1
     fprintf('Arduino Uno stimulator connected on %s \n', stimulator.Port);

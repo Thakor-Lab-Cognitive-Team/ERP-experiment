@@ -1,5 +1,5 @@
 #define NUM_PARAMETERS 4
-#define BUFFER_SIZE 16
+#define BUFFER_SIZE 17
 
 int stimulatorPin = 12; //pin used to stimulate the subject
 int triggerPin = 5;

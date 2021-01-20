@@ -10,7 +10,7 @@ actual sampling_rate is 85 Hz
 %}
 
 %% Connect to the sensor
-sensor = serialport('/dev/cu.usbmodem141401', 9600);
+sensor = serialport('/dev/cu.usbmodem142401', 9600);
 
 if exist('sensor', 'var') == 1
     fprintf('Arduino Uno sensor connected on %s \n', sensor.Port);
@@ -20,14 +20,17 @@ end
 
 flush(sensor);
 sensor.UserData = struct("data",[],"count", 1);
-configureTerminator(sensor,"CR/LF");
+configureTerminator(sensor,"LF");
 configureCallback(sensor, "terminator", @readData);
 
 %% Prompt the sensor once and read from it
 sensor.UserData = struct("data",[],"count", 1);
 out = zeros(1, 3);
 out(1) = 1; % start flag for Arduino
-out(2) = 6000; % length of sampling in millisec
+out(2) = 3000; % length of sampling in millisec
 out(3) = 100; % sampling_freq
 
 write(sensor, out, "uint16");
+
+%% plot
+plot(sensor.UserData.data);

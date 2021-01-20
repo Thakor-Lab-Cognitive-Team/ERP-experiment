@@ -23,7 +23,7 @@ void loop() {
     memcpy(&start, &serialBuffer[0], 2);
     memcpy(&duration, &serialBuffer[2], 2);
     memcpy(&sampling_rate, &serialBuffer[4], 2);
-    period = 1000 / sampling_rate;
+    period = 1000.0 / float(sampling_rate);
     
     if (start == 1) {
       t0 = millis();
@@ -32,12 +32,11 @@ void loop() {
   
   if (start == 1) {
     if (millis() - t0 > duration) {
-      start == 0;
+      start = 0;
     }
     else {
       sensorReading = Vernier.readSensor();
       Serial.print(sensorReading);
-      Serial.write(13);
       Serial.write(10);
       delay(period);
     }
