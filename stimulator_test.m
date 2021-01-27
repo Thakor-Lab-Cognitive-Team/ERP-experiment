@@ -13,8 +13,8 @@ end
 presentation = 4; % number of presentations for each trial
 duration = 2; % duration of stimulation in sec
 delay = 2; % delay after stimulation in sec
-PW = 5; % pulse width in ms
-freq = 47; % frequency in Hz
+PW = 1.5; % pulse width in ms
+freq = 24.5; % frequency in Hz
 
 out = zeros(1, 4);
 out(1) = 1; % start flag for Arduino

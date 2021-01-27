@@ -1,5 +1,4 @@
-#define NUM_PARAMETERS 4
-#define BUFFER_SIZE 17
+#define BUFFER_SIZE 16
 
 int stimulatorPin = 12; //pin used to stimulate the subject
 int triggerPin = 5;
@@ -16,7 +15,7 @@ int period_floor;
 int period_ceil;
 int period_digit;
 float period;
-float needTrigger = 0;
+bool needTrigger = false;
 byte serialBuffer[BUFFER_SIZE];
 float t0;
 
@@ -48,7 +47,7 @@ void loop() {
     if (start == 1.0f) {
       t0 = millis();
     }
-    needTrigger = 1;
+    needTrigger = true;
   }
 
   // make sure trigger pin is LOW
@@ -69,20 +68,14 @@ void loop() {
       delayMicroseconds(rev_pw_digit);
       delay(period_floor - pw_ceil);
       delayMicroseconds(period_digit);
-      // busyDelayMicroseconds((period - pulse_width) * 1000);
     }
   }
   else {
     digitalWrite(stimulatorPin, LOW);
   }
 
-  if (needTrigger == 1.0f) {
+  if (needTrigger == true) {
     digitalWrite(triggerPin, HIGH);
-    needTrigger = 0;
+    needTrigger = false;
   }
-}
-
-void busyDelayMicroseconds( unsigned int wait ) {
-    unsigned long t0 = micros();
-    while ( micros() - t0 < wait ) {}
 }

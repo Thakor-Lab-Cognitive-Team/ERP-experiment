@@ -79,7 +79,6 @@ for j = 1:presentation
 end
 
 fprintf('hit enter to continue to threshold detection\n');
-pause;
 
 %% 2. Threshold detection
 freq = [2 14 26 38 50];
@@ -114,7 +113,6 @@ plot(freq, percentage, '-*');
 fprintf('The threshold frequency is %d\n', threshold);
 
 fprintf('hit enter to continue to Sensory feedback\n');
-pause;
 
 %% 3. Sensory feedback
 freq = [threshold threshold+5 threshold+10];
@@ -161,7 +159,6 @@ save(strcat(folder_name, '/forces_sensory_feedback.mat'), 'forces');
 save(strcat(folder_name, '/average_forces_sensory_feedback.mat'), 'average_forces');
 
 fprintf('hit enter to continue to EEG recordings\n');
-pause;
 
 %% 4. EEG recordings
 presentation = 30;

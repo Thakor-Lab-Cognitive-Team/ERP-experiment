@@ -1,16 +1,17 @@
 #include "VernierLib.h"
+#define NUM_PARAMETERS 3
 #define BUFFER_SIZE 7
 
 int triggerPin = 13;
 
 int start = 0;
-int duration;
-int sampling_rate;
+int duration = 1000;
+int sampling_rate = 10;
 float period;
 VernierLib Vernier;
 float sensorReading;
 bool needTrigger = false;
-byte serialBuffer[BUFFER_SIZE];
+byte serialBuffer[2];
 float t0;
 
 void setup() {
@@ -21,11 +22,10 @@ void setup() {
 
 void loop() {
   if (Serial.available()) {
-    Serial.readBytes(serialBuffer, BUFFER_SIZE);
+    Serial.readBytes(serialBuffer, 2);
     
-    memcpy(&start, &serialBuffer[0], 2);
-    memcpy(&duration, &serialBuffer[2], 2);
-    memcpy(&sampling_rate, &serialBuffer[4], 2);
+    memcpy(&start, &serialBuffer[0], 1);
+    start = start - 48;
     period = 1000.0 / float(sampling_rate);
     
     if (start == 1) {
@@ -33,8 +33,6 @@ void loop() {
     }
     needTrigger = true;
     Serial.println("start");
-    Serial.println(sampling_rate);
-    Serial.println(period);
   }
 
   // make sure trigger pin is LOW
