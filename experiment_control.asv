@@ -101,7 +101,7 @@ for i = 1:presentation
     write(stimulator, out, 'single');
     pause(duration);
     percentage(sequence(i)) = percentage(sequence(i)) + input('Do you feel the stimulation? 1 is No, 2 is Yes: ') - 1;
-    pause(delay);
+    pause(2);
 end
 
 % Save data
@@ -118,17 +118,15 @@ fprintf('hit enter to continue to Sensory feedback\n');
 
 %% 3. Sensory feedback
 freq = [threshold threshold+5 threshold+10];
-stim_counter = zeros(1, 3);
-presentation = 30;
 forces = cell(3, presentation);
 average_forces = cell(3, 1);
+presentation = 30;
 
 % Generate random sequence of stimulation
 sequence = randi(3, 1, presentation);
 freq_sequence = freq(sequence);
 
 for i = 1:presentation
-    pointer = sequence(i);
     fprintf('\n%d of %d\r', i, presentation);
     pause(1);
     out = zeros(1, 4);
@@ -138,22 +136,43 @@ for i = 1:presentation
     out(4) = PW; % pulse width of stimulation in ms   
     sensor.UserData = struct("data", [], "count", 1);
     write(stimulator, out, 'single');
-    write(sensor, sensor_out, 'uint16');
-    pause(duration + delay);
-    stim_counter(pointer) = stim_counter(pointer) + 1;
-    forces{pointer, stim_counter(pointer)} = sensor.UserData.data;
+    write(sensor, sensor_out, 'uint1
+    pause(duration);
+    percentage(sequence(i)) = percentage(sequence(i)) + input('Do you feel the stimulation? 1 is No, 2 is Yes: ') - 1;
+    pause(2);    
+end
+
+for i = 1:3
+    out = zeros(1, 4);
+    out(1) = 1; % start flag for Arduino
+    out(2) = duration; % length of stimulation in sec
+    out(3) = freq(i); % frequency of pulse in Hz
+    out(4) = PW; % pulse width of stimulation in ms
+    
+    fprintf('frequency %d', i);
+    pause(1);
+    
+    for j = 1:presentation
+        fprintf('\n%d of %d\r', j, presentation);
+        sensor.UserData = struct("data",[],"count", 1);
+        write(stimulator, out, 'single');
+        write(sensor, sensor_out, 'uint16');
+        pause(duration + delay);  
+        forces{i, j} = sensor.UserData.data;
+    end
+    pause(10);
 end
 
 figure();
 hold on;
 color = ['r', 'g', 'b'];
 for i =1:3
-    dimension = max(cellfun('length', forces(sequence == i)));
+    dimension = max(cellfun('length', forces(1, :)));
     average_forces{i} = zeros(1, dimension);
-    for j = 1:stim_counter(i)
+    for j = 1:presentation
         average_forces{i} = average_forces{i} + padarray(forces{i, j}, [0 dimension-size(forces{i,j},2)], 0, 'post');
     end
-    average_forces{i} = average_forces{i} / stim_counter(i);
+    average_forces{i} = average_forces{i} / presentation;
     plot(average_forces{i}, color(i));
 end
 legend('low', 'mid', 'high');
