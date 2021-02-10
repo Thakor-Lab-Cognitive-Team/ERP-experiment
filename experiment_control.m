@@ -34,7 +34,7 @@ end
 
 
 if exist('sensor', 'var') == 0
-    sensor = serialport('/dev/cu.usbmodem142401', 9600);
+    sensor = serialport('/dev/cu.usbmodem142301', 9600);
     flush(sensor);
     sensor.UserData = struct("data",[],"count", 1);
     configureTerminator(sensor, "LF");
@@ -51,20 +51,20 @@ else
     error('Error: Arduino stimulator not connected \n');
 end
 
-% if exist('sensor', 'var') == 1
-%     fprintf('Arduino Uno sensor connected on %s \n', sensor.Port);
-% else
-%     error('Error: Arduino sensor not connected \n');
-% end
+if exist('sensor', 'var') == 1
+    fprintf('Arduino Uno sensor connected on %s \n', sensor.Port);
+else
+    error('Error: Arduino sensor not connected \n');
+end
 
-fprintf('Experiment: ERP study with TENS and Vibration \nhit enter to continue \n');
+fprintf('Experiment: ERP study with TENS and Vibration \n');
 
 %% 1. Sensory mapping
-presentation = 4; % number of presentations for each trial
-duration = 2; % duration of stimulation in sec
+presentation = 50; % number of presentations for each trial
+duration = 3; % duration of stimulation in sec
 delay = 4; % delay after stimulation in sec
-freq = 10; % frequency in Hz
-PW = 1; % pulse width in ms
+freq = 2; % frequency in Hz
+PW = 0.7; % pulse width in ms
 
 out = zeros(1, 4);
 out(1) = 1; % start flag for Arduino
@@ -75,10 +75,10 @@ out(4) = PW; % pulse width of stimulation in ms
 for j = 1:presentation
     fprintf('\n%d of %d\r', j, presentation);
     write(stimulator, out, 'single');
-    pause(duration + delay);
+    pause(duration + 1);
 end
 
-fprintf('hit enter to continue to threshold detection\n');
+fprintf('finished sensory mapping\n');
 
 %% 2. Threshold detection
 freq = [2 14 26 38 50];
@@ -101,7 +101,6 @@ for i = 1:presentation
     write(stimulator, out, 'single');
     pause(duration);
     percentage(sequence(i)) = percentage(sequence(i)) + input('Do you feel the stimulation? 1 is No, 2 is Yes: ') - 1;
-    pause(delay);
 end
 
 % Save data
@@ -114,7 +113,7 @@ threshold = freq(idx);
 plot(freq, percentage, '-*');
 fprintf('The threshold frequency is %d\n', threshold);
 
-fprintf('hit enter to continue to Sensory feedback\n');
+fprintf('finished threshold detection\n');
 
 %% 3. Sensory feedback
 freq = [threshold threshold+5 threshold+10];
@@ -144,6 +143,7 @@ for i = 1:presentation
     forces{pointer, stim_counter(pointer)} = sensor.UserData.data;
 end
 
+%%
 figure();
 hold on;
 color = ['r', 'g', 'b'];
@@ -158,11 +158,12 @@ for i =1:3
 end
 legend('low', 'mid', 'high');
 
+%%
 % Save data
 save(strcat(folder_name, '/forces_sensory_feedback.mat'), 'forces');
 save(strcat(folder_name, '/average_forces_sensory_feedback.mat'), 'average_forces');
 
-fprintf('hit enter to continue to EEG recordings\n');
+fprintf('finished sensory feedback\n');
 
 %% 4. EEG recordings
 presentation = 30;
@@ -182,7 +183,7 @@ fprintf('Block 1: grip when there is a stimulation\n');
 pause;
 % Stimulation
 for i = 1:presentation
-    fprintf('%d of %d trial|\r\n', i, presentation);
+    fprintf('\n%d of %d\r', i, presentation);
     sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
@@ -196,7 +197,7 @@ end
 dimension = max(cellfun('length', forces(1, :)));
 average_forces{1} = zeros(1, dimension);
 for j = 1:presentation
-    average_forces{1} = average_forces{1} + reshape(forces{1, j}, [1 dimension]);
+    average_forces{1} = average_forces{1} + padarray(forces{i, j}, [0 dimension-size(forces{1,j},2)], 0, 'post');
 end
 average_forces{1} = average_forces{1} / presentation;
 
@@ -205,7 +206,7 @@ fprintf('Block 2: grip according to stimulation intensity\n');
 pause;
 % Stimulation
 for i = 1:presentation
-    fprintf('%d of %d trial|\r\n', i, presentation);
+    fprintf('\n%d of %d\r', i, presentation);
     sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
@@ -219,7 +220,7 @@ end
 dimension = max(cellfun('length', forces(2, :)));
 average_forces{2} = zeros(1, dimension);
 for j = 1:presentation
-    average_forces{2} = average_forces{2} + reshape(forces{2, j}, [1 dimension]);
+    average_forces{2} = average_forces{2} + padarray(forces{2, j}, [0 dimension-size(forces{i,j},2)], 0, 'post');
 end
 average_forces{2} = average_forces{2} / presentation;
 
@@ -228,7 +229,7 @@ fprintf('Block 3: grip according to stimulation intensity\n');
 pause;
 % Stimulation
 for i = 1:presentation
-    fprintf('%d of %d trial|\r\n', i, presentation);
+    fprintf('\n%d of %d\r', i, presentation);
     sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
@@ -242,7 +243,7 @@ end
 dimension = max(cellfun('length', forces(3, :)));
 average_forces{3} = zeros(1, dimension);
 for j = 1:presentation
-    average_forces{3} = average_forces{3} + reshape(forces{3, j}, [1 dimension]);
+    average_forces{3} = average_forces{3} + padarray(forces{3, j}, [0 dimension-size(forces{i,j},2)], 0, 'post');
 end
 average_forces{3} = average_forces{3} / presentation;
 
@@ -251,3 +252,4 @@ save(strcat('data/', date, '/', subject_name, '/forces_EEG_recording.mat'), forc
 save(strcat('data/', date, '/', subject_name, '/average_forces_EEG_recording.mat'), average_forces);
 save(strcat('data/', date, '/', subject_name, '/stimulation_EEG_recording.mat'), freq_sequence);
 
+fprintf('finished EEG recordings\n');

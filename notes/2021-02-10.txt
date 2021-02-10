@@ -1,0 +1,36 @@
+2021-02-10 Testing TENS parameters
+Author: Ze Ou
+
+Tested stimulation of the parm using param: 
+
+duration = 3; % duration of stimulation in sec
+delay = 1; % delay after stimulation in sec
+freq = 5; % frequency in Hz
+PW = 1; % pulse width in ms
+amp = 2; % amplitude in mA
+
+It felt like something was hitting against my hand, I was able to feel 
+the individual pulses and there is no prick feeling unlike other locations
+including the wrist and the elbow.
+
+Upon further sensory mapping, I changed the params to:
+duration = 3; % duration of stimulation in sec
+delay = 4; % delay after stimulation in sec
+freq = 2; % frequency in Hz
+PW = 0.7; % pulse width in ms
+amp = 0.90; % amplitude in mA
+
+This change lightened the impact felt by the hand. It does not feel like
+getting hit by a rock anymore, but more of a light tap
+
+The feelings are discrete, so I doubt changing the frequency would be
+perceived as changing the intensity of the stimulation but just as more
+frequent impact, therefore I would argue that changing the pulse width
+would actually change the perceived intensity of the signal
+
+Thus, I am gonna vary the pulse width and plot a psycophysics curve
+
+Yes, I tested using PW = [0.1 0.3 0.5 0.7 0.9]. The curve itself is not
+completely sigmoidal because the outcome is [0 0 0.5 1 1], but if we shrink
+the range of pulse width tested, then we will sure get a good sigmodal
+function

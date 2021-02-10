@@ -48,7 +48,6 @@ void loop() {
     else {
       sensorReading = Vernier.readSensor();
       if (needTrigger == true && sensorReading > 20){
-        Serial.println("threshold hit");
         digitalWrite(triggerPin, HIGH);
         delay(10);
         digitalWrite(triggerPin, LOW);
