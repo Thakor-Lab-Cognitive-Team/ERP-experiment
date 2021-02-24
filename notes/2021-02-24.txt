@@ -1,0 +1,19 @@
+2021-02-24 Trigger pin location
+Author: Ze Ou
+
+The trigger pins from the green arduino box are connected to digital
+pins 8, 9, and 10.
+
+
+
+2021-02-24 EEG Parallel port
+Author: Ze Ou
+
+All 8 pins of the trigger parallel port need to connect to ground before
+the first trigger is issued. Otherwise, only one trigger can be used at 
+a time. Disconnected pins are read as 1's by the EEG system. Therefore, if
+pin 7 is connected, the rest state is 01111111, and then since the value is
+inverted, the rest state is 10000000. Then when pin 7 is output high, the 
+readout is 11111111, after inversion it becomes 00000000, which sets the
+ground state for the EEG system. Next, when the output goes low, the
+readout becomes 10000000, thus output a 128 event marker on the screen.

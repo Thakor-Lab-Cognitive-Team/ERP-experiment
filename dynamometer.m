@@ -10,7 +10,7 @@ actual sampling_rate is 85 Hz
 %}
 
 %% Connect to the sensor
-sensor = serialport('/dev/cu.usbmodem142401', 9600);
+sensor = serialport('/dev/cu.usbmodem143301', 9600);
 
 if exist('sensor', 'var') == 1
     fprintf('Arduino Uno sensor connected on %s \n', sensor.Port);

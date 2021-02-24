@@ -1,7 +1,7 @@
 #define BUFFER_SIZE 16
 
 int stimulatorPin = 12; //pin used to stimulate the subject
-int triggerPin = 5;
+int triggerPin = 9;
 
 float start = 0;
 float duration;
@@ -53,6 +53,13 @@ void loop() {
   // make sure trigger pin is LOW
   digitalWrite(triggerPin, LOW);
 
+  if (needTrigger == true) {
+    digitalWrite(triggerPin, HIGH);
+    needTrigger = false;
+    delayMicroseconds(10);
+    digitalWrite(triggerPin, LOW);
+  }
+
   // check if we are stimulating
   if (start == 1.0f) {
     if (millis() - t0 > duration) {
@@ -74,8 +81,4 @@ void loop() {
     digitalWrite(stimulatorPin, LOW);
   }
 
-  if (needTrigger == true) {
-    digitalWrite(triggerPin, HIGH);
-    needTrigger = false;
-  }
 }

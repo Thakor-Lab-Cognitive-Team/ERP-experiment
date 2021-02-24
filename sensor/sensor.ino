@@ -32,9 +32,6 @@ void loop() {
       t0 = millis();
     }
     needTrigger = true;
-    Serial.println("start");
-    Serial.println(sampling_rate);
-    Serial.println(period);
   }
 
   // make sure trigger pin is LOW
