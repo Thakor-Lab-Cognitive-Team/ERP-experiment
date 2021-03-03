@@ -62,7 +62,7 @@ fprintf('Experiment: ERP study with TENS and Vibration \n');
 %% 1. Sensory mapping
 presentation = 50; % number of presentations for each trial
 duration = 3; % duration of stimulation in sec
-delay = 4; % delay after stimulation in sec
+delay = 3; % delay after stimulation in sec
 freq = 2; % frequency in Hz
 PW = 0.7; % pulse width in ms
 
@@ -81,13 +81,13 @@ end
 fprintf('finished sensory mapping\n');
 
 %% 2. Threshold detection
-freq = [2 14 26 38 50];
+PW = [0.1 0.3 0.5 0.7 0.9];
 percentage = zeros(5, 1);
 presentation = 50;
 
 % Generate random sequence of stimulation
 sequence = randi(5, 1, presentation);
-freq_sequence = freq(sequence);
+PW_sequence = PW(sequence);
 
 
 for i = 1:presentation
@@ -96,8 +96,8 @@ for i = 1:presentation
     out = zeros(1, 4);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
-    out(3) = freq_sequence(i); % frequency of pulse in Hz
-    out(4) = PW; % pulse width of stimulation in ms   
+    out(3) = freq; % frequency of pulse in Hz
+    out(4) = PW_sequence(i); % pulse width of stimulation in ms   
     write(stimulator, out, 'single');
     pause(duration);
     percentage(sequence(i)) = percentage(sequence(i)) + input('Do you feel the stimulation? 1 is No, 2 is Yes: ') - 1;
@@ -109,14 +109,14 @@ for i = 1:5
 end
 save(strcat(folder_name, '/psychophysics.mat'), 'percentage');
 [~, idx] = min(abs(percentage - 0.5));
-threshold = freq(idx);
-plot(freq, percentage, '-*');
+threshold = PW(idx);
+plot(PW, percentage, '-*');
 fprintf('The threshold frequency is %d\n', threshold);
 
 fprintf('finished threshold detection\n');
 
 %% 3. Sensory feedback
-freq = [threshold threshold+5 threshold+10];
+PW = [threshold threshold+0.2 threshold+0.4];
 stim_counter = zeros(1, 3);
 presentation = 30;
 forces = cell(3, presentation);
@@ -124,7 +124,7 @@ average_forces = cell(3, 1);
 
 % Generate random sequence of stimulation
 sequence = randi(3, 1, presentation);
-freq_sequence = freq(sequence);
+PW_sequence = PW(sequence);
 
 for i = 1:presentation
     pointer = sequence(i);
@@ -133,8 +133,8 @@ for i = 1:presentation
     out = zeros(1, 4);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
-    out(3) = freq_sequence(i); % frequency of pulse in Hz
-    out(4) = PW; % pulse width of stimulation in ms   
+    out(3) = freq; % frequency of pulse in Hz
+    out(4) = PW_sequence(i); % pulse width of stimulation in ms   
     sensor.UserData = struct("data", [], "count", 1);
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
@@ -172,11 +172,11 @@ average_forces = cell(3, 1);
 
 % Generate random sequence of stimulation
 sequence = randi(3, 2, presentation);
-freq_sequence = zeros(3, presentation);
-freq_sequence(1:2, :) = freq(sequence);
-freq = [freq threshold+2.5 threshold+7.5 threshold+12.5];
+PW_sequence = zeros(3, presentation);
+PW_sequence(1:2, :) = PW(sequence);
+PW = [PW threshold+0.1 threshold+0.3 threshold+0.5];
 sequence = randi(6, 1, presentation);
-freq_sequence(3, :) = freq(sequence);
+PW_sequence(3, :) = PW(sequence);
 
 % Block 1
 fprintf('Block 1: grip when there is a stimulation\n');
@@ -187,8 +187,8 @@ for i = 1:presentation
     sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
-    out(3) = freq_sequence(1, i); % frequency of pulse in Hz
-    out(4) = PW; % pulse width of stimulation in ms
+    out(3) = freq; % frequency of pulse in Hz
+    out(4) = PW_sequence(1, i); % pulse width of stimulation in ms
     write(stimulator, out);
     write(sensor, sensor_out, 'single');
     pause(duration + delay);
@@ -210,8 +210,8 @@ for i = 1:presentation
     sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
-    out(3) = freq_sequence(1, i); % frequency of pulse in Hz
-    out(4) = PW; % pulse width of stimulation in ms
+    out(3) = freq; % frequency of pulse in Hz
+    out(4) = PW_sequence(2, i); % pulse width of stimulation in ms
     write(stimulator, out);
     write(sensor, sensor_out, 'single');
     pause(duration + delay);
@@ -233,8 +233,8 @@ for i = 1:presentation
     sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
-    out(3) = freq_sequence(1, i); % frequency of pulse in Hz
-    out(4) = PW; % pulse width of stimulation in ms
+    out(3) = freq; % frequency of pulse in Hz
+    out(4) = PW_sequence(3, i); % pulse width of stimulation in ms
     write(stimulator, out);
     write(sensor, sensor_out, 'single');
     pause(duration + delay);
@@ -250,6 +250,6 @@ average_forces{3} = average_forces{3} / presentation;
 % Save data
 save(strcat('data/', date, '/', subject_name, '/forces_EEG_recording.mat'), forces);
 save(strcat('data/', date, '/', subject_name, '/average_forces_EEG_recording.mat'), average_forces);
-save(strcat('data/', date, '/', subject_name, '/stimulation_EEG_recording.mat'), freq_sequence);
+save(strcat('data/', date, '/', subject_name, '/stimulation_EEG_recording.mat'), PW_sequence);
 
 fprintf('finished EEG recordings\n');
