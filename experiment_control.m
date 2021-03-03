@@ -62,9 +62,11 @@ fprintf('Experiment: ERP study with TENS and Vibration \n');
 %% 1. Sensory mapping
 presentation = 50; % number of presentations for each trial
 duration = 3; % duration of stimulation in sec
-delay = 3; % delay after stimulation in sec
+delay = 2; % delay after stimulation in sec
 freq = 2; % frequency in Hz
 PW = 0.7; % pulse width in ms
+jitter_max = 1;
+jitter_min = -1;
 
 out = zeros(1, 4);
 out(1) = 1; % start flag for Arduino
@@ -75,7 +77,8 @@ out(4) = PW; % pulse width of stimulation in ms
 for j = 1:presentation
     fprintf('\n%d of %d\r', j, presentation);
     write(stimulator, out, 'single');
-    pause(duration + 1);
+    jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
+    pause(duration + delay + jitter);
 end
 
 fprintf('finished sensory mapping\n');
@@ -92,14 +95,14 @@ PW_sequence = PW(sequence);
 
 for i = 1:presentation
     fprintf('\n%d of %d\r', i, presentation);
-    pause(1);
     out = zeros(1, 4);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
     out(4) = PW_sequence(i); % pulse width of stimulation in ms   
     write(stimulator, out, 'single');
-    pause(duration);
+    jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
+    pause(duration + delay + jitter);
     percentage(sequence(i)) = percentage(sequence(i)) + input('Do you feel the stimulation? 1 is No, 2 is Yes: ') - 1;
 end
 
@@ -129,7 +132,6 @@ PW_sequence = PW(sequence);
 for i = 1:presentation
     pointer = sequence(i);
     fprintf('\n%d of %d\r', i, presentation);
-    pause(1);
     out = zeros(1, 4);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
@@ -138,7 +140,8 @@ for i = 1:presentation
     sensor.UserData = struct("data", [], "count", 1);
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
-    pause(duration + delay);
+    jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
+    pause(duration + delay + jitter);
     stim_counter(pointer) = stim_counter(pointer) + 1;
     forces{pointer, stim_counter(pointer)} = sensor.UserData.data;
 end
@@ -191,7 +194,8 @@ for i = 1:presentation
     out(4) = PW_sequence(1, i); % pulse width of stimulation in ms
     write(stimulator, out);
     write(sensor, sensor_out, 'single');
-    pause(duration + delay);
+    jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
+    pause(duration + delay + jitter);
     forces{1, i} = sensor.UserData.data;
 end
 dimension = max(cellfun('length', forces(1, :)));
@@ -214,7 +218,8 @@ for i = 1:presentation
     out(4) = PW_sequence(2, i); % pulse width of stimulation in ms
     write(stimulator, out);
     write(sensor, sensor_out, 'single');
-    pause(duration + delay);
+    jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
+    pause(duration + delay + jitter);
     forces{2, i} = sensor.UserData.data;
 end
 dimension = max(cellfun('length', forces(2, :)));
@@ -237,7 +242,8 @@ for i = 1:presentation
     out(4) = PW_sequence(3, i); % pulse width of stimulation in ms
     write(stimulator, out);
     write(sensor, sensor_out, 'single');
-    pause(duration + delay);
+    jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
+    pause(duration + delay + jitter);
     forces{3, i} = sensor.UserData.data;
 end
 dimension = max(cellfun('length', forces(3, :)));
