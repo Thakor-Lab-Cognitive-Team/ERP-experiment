@@ -64,7 +64,7 @@ presentation = 50; % number of presentations for each trial
 duration = 3; % duration of stimulation in sec
 delay = 2; % delay after stimulation in sec
 freq = 2; % frequency in Hz
-PW = 0.7; % pulse width in ms
+PW = 1; % pulse width in ms
 jitter_max = 1;
 jitter_min = 0;
 
@@ -84,7 +84,7 @@ end
 fprintf('finished sensory mapping\n');
 
 %% 2. Threshold detection
-PW = [0.1 0.3 0.5 0.7 0.9];
+PW = [0.9 1 1.1 1.2 1.3];
 percentage = zeros(5, 1);
 presentation = 50;
 
@@ -151,7 +151,7 @@ figure();
 hold on;
 color = ['r', 'g', 'b'];
 for i =1:3
-    dimension = max(cellfun('length', forces(sequence == i)));
+    dimension = max(cellfun('length', forces(i, :)));
     average_forces{i} = zeros(1, dimension);
     for j = 1:stim_counter(i)
         average_forces{i} = average_forces{i} + padarray(forces{i, j}, [0 dimension-size(forces{i,j},2)], 0, 'post');
@@ -184,6 +184,7 @@ PW_sequence(3, :) = PW(sequence);
 % Block 1
 fprintf('Block 1: grip when there is a stimulation\n');
 pause;
+
 % Stimulation
 for i = 1:presentation
     fprintf('\n%d of %d\r', i, presentation);
@@ -254,7 +255,7 @@ for j = 1:presentation
 end
 average_forces{3} = average_forces{3} / presentation;
 
-%% Save data
+% Save data
 save(strcat(folder_name, '/forces_EEG_recording.mat'), 'forces');
 save(strcat(folder_name, '/average_forces_EEG_recording.mat'), 'average_forces');
 save(strcat(folder_name, '/stimulation_EEG_recording.mat'), 'PW_sequence');

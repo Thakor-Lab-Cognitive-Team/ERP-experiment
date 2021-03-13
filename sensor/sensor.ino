@@ -44,7 +44,7 @@ void loop() {
     }
     else {
       sensorReading = Vernier.readSensor();
-      if (needTrigger == true && sensorReading > 10){
+      if (needTrigger == true && sensorReading > 5){
         digitalWrite(triggerPin, HIGH);
         delay(10);
         digitalWrite(triggerPin, LOW);
