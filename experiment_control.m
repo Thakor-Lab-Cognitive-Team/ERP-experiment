@@ -169,17 +169,22 @@ save(strcat(folder_name, '/average_forces_sensory_feedback.mat'), 'average_force
 fprintf('finished sensory feedback\n');
 
 %% 4. EEG recordings
-presentation = 30;
+presentation = 96; % Must be multiples of 12
 forces = cell(3, presentation);
 average_forces = cell(3, 1);
 
-% Generate random sequence of stimulation
-sequence = randi(3, 2, presentation);
-PW_sequence = zeros(3, presentation);
-PW_sequence(1:2, :) = PW(sequence);
+% Generate pseudo-random sequence of stimulation
+sequence = [ones(2, presentation/6), 2*ones(2, presentation/6), 3*ones(2, presentation/6)];
+sequence = [sequence, randi(3, 2, presentation/2)];
+sequence(1, :) = sequence(1, randperm(presentation));
+sequence(2, :) = sequence(2, randperm(presentation));
+PW12_sequence = PW(sequence);
 PW = [PW threshold+0.1 threshold+0.3 threshold+0.5];
-sequence = randi(6, 1, presentation);
-PW_sequence(3, :) = PW(sequence);
+sequence = [ones(2, presentation/12), 2*ones(2, presentation/12), 3*ones(2, presentation/12)];
+sequence = [sequence, sequence+3];
+sequence = [sequence, randi(6, 1, presentation/2)];
+sequence = sequence(randperm(presentation*4));
+PW3_sequence(3, :) = PW(sequence);
 
 % Block 1
 fprintf('Block 1: grip when there is a stimulation\n');
@@ -192,7 +197,7 @@ for i = 1:presentation
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
-    out(4) = PW_sequence(1, i); % pulse width of stimulation in ms
+    out(4) = PW12_sequence(1, i); % pulse width of stimulation in ms
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
@@ -217,7 +222,7 @@ for i = 1:presentation
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
-    out(4) = PW_sequence(2, i); % pulse width of stimulation in ms
+    out(4) = PW12_sequence(2, i); % pulse width of stimulation in ms
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
@@ -241,7 +246,7 @@ for i = 1:presentation
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
-    out(4) = PW_sequence(3, i); % pulse width of stimulation in ms
+    out(4) = PW3_sequence(3, i); % pulse width of stimulation in ms
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
@@ -258,6 +263,7 @@ average_forces{3} = average_forces{3} / presentation;
 % Save data
 save(strcat(folder_name, '/forces_EEG_recording.mat'), 'forces');
 save(strcat(folder_name, '/average_forces_EEG_recording.mat'), 'average_forces');
-save(strcat(folder_name, '/stimulation_EEG_recording.mat'), 'PW_sequence');
+save(strcat(folder_name, '/stimulation12_EEG_recording.mat'), 'PW12_sequence');
+save(strcat(folder_name, '/stimulation3_EEG_recording.mat'), 'PW3_sequence');
 
 fprintf('finished EEG recordings\n');
