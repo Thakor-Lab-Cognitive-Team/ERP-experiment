@@ -14,7 +14,7 @@ stimulate the subject with the 50% stimulation threshold and two
 intensities above it, and record the force applied for each level
 
 4th block EEG recordings:
-1. apply force when there is a stimulus, disregard intensity
+1. apply minumum force when there is a stimulus, disregard intensity
 2. apply force when there is a stimulus with regards to discrete intensity
 3. apply force when there is a stimulus with regards to continuous
 intensity
@@ -207,7 +207,7 @@ for j = 1:presentation
 end
 average_forces{1} = average_forces{1} / presentation;
 
-% Block 2
+%% Block 2
 fprintf('Block 2: grip according to stimulation intensity\n');
 pause;
 % Stimulation
