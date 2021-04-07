@@ -66,11 +66,11 @@ fprintf('Experiment: ERP study with TENS and Vibration \n');
 %% 1. Sensory mapping
 presentation = 50; % number of presentations for each trial
 duration = 4; % duration of stimulation in sec
-delay = 2; % delay after stimulation in sec
-freq = 5; % frequency in Hz
-PW = 0.5; % pulse width in ms
-jitter_max = 0.5;
-jitter_min = 0;
+delay = 1.5; % delay after stimulation in sec
+freq = 2; % frequency in Hz
+PW = 2.5; % pulse width in ms
+jitter_max = 0,5;
+jitter_min = -0.5;
 
 out = zeros(1, 5);
 out(1) = 1; % start flag for Arduino
@@ -89,7 +89,7 @@ end
 fprintf('finished sensory mapping\n');
 
 %% 2. Threshold detection
-PW = [0.5 0.6 0.7 0.8 0.9];
+PW = [1.5 1.7 1.9 2.1 2.3];
 percentage = zeros(5, 1);
 presentation = 50;
 
@@ -100,7 +100,6 @@ PW_sequence = PW(sequence);
 
 for i = 1:presentation
     fprintf('\n%d of %d\r', i, presentation);
-    out = zeros(1, 4);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
@@ -124,12 +123,12 @@ fprintf('The threshold frequency is %d\n', threshold);
 fprintf('finished threshold detection\n');
 
 %% 3. Sensory feedback
-PW = [threshold threshold+0.2 threshold+0.4];
+PW = [threshold threshold+0.5 threshold+1];
 stim_counter = zeros(1, 3);
 presentation = 30;
 forces = cell(3, presentation);
 average_forces = cell(3, 1);
-jitter_min = -0.5;
+delay = 1.5; % delay after stimulation in sec
 
 % Generate random sequence of stimulation
 sequence = randi(3, 1, presentation);
@@ -138,7 +137,6 @@ PW_sequence = PW(sequence);
 for i = 1:presentation
     pointer = sequence(i);
     fprintf('\n%d of %d\r', i, presentation);
-    out = zeros(1, 4);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
@@ -187,14 +185,14 @@ sequence = [sequence, randi(3, 2, presentation/2)];
 sequence(1, :) = sequence(1, randperm(presentation));
 sequence(2, :) = sequence(2, randperm(presentation));
 PW12_sequence = PW(sequence);
-PW = [PW threshold+0.1 threshold+0.3 threshold+0.5];
+PW = [PW threshold+0.25 threshold+0.75 threshold+1.25];
 sequence = [ones(1, presentation/12), 2*ones(1, presentation/12), 3*ones(1, presentation/12)];
 sequence = [sequence, sequence+3];
 sequence = [sequence, randi(6, 1, presentation/2)];
 sequence = sequence(randperm(presentation));
-PW3_sequence(3, :) = PW(sequence);
+PW3_sequence = PW(sequence);
 
-% Block 1
+%% Block 1
 fprintf('Block 1: grip when there is a stimulation\n');
 
 % Stimulation
@@ -245,7 +243,7 @@ for j = 1:presentation
 end
 average_forces{2} = average_forces{2} / presentation;
 
-% Block 3
+%% Block 3
 fprintf('Block 3: grip according to stimulation intensity\n');
 pause;
 % Stimulation
@@ -255,7 +253,7 @@ for i = 1:presentation
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
-    out(4) = PW3_sequence(3, i); % pulse width of stimulation in ms
+    out(4) = PW3_sequence(i); % pulse width of stimulation in ms
     out(5) = sequence(i); % trigger type
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');

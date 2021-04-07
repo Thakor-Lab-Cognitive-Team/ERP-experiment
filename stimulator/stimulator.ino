@@ -1,4 +1,4 @@
-#define BUFFER_SIZE 16
+#define BUFFER_SIZE 20
 
 int stimulatorPin = 12; //pin used to stimulate the subject
 int triggerPins[3] = {8, 9, 10};
