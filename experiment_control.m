@@ -41,7 +41,7 @@ if exist('sensor', 'var') == 0
     configureCallback(sensor, "terminator", @readData);
     sensor_out = zeros(1, 3);
     sensor_out(1) = 1; % start flag for Arduino
-    sensor_out(2) = 3500; % length of sampling in millisec
+    sensor_out(2) = 4500; % length of sampling in millisec
     sensor_out(3) = 100; % sampling_freq
 end
 
@@ -61,11 +61,11 @@ fprintf('Experiment: ERP study with TENS and Vibration \n');
 
 %% 1. Sensory mapping
 presentation = 50; % number of presentations for each trial
-duration = 3; % duration of stimulation in sec
+duration = 4; % duration of stimulation in sec
 delay = 2; % delay after stimulation in sec
-freq = 2; % frequency in Hz
-PW = 1; % pulse width in ms
-jitter_max = 1;
+freq = 5; % frequency in Hz
+PW = 0.5; % pulse width in ms
+jitter_max = 0.5;
 jitter_min = 0;
 
 out = zeros(1, 5);
@@ -125,7 +125,7 @@ stim_counter = zeros(1, 3);
 presentation = 30;
 forces = cell(3, presentation);
 average_forces = cell(3, 1);
-jitter_min = -1;
+jitter_min = -0.5;
 
 % Generate random sequence of stimulation
 sequence = randi(3, 1, presentation);

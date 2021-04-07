@@ -44,14 +44,16 @@ void loop() {
     }
     else {
       sensorReading = Vernier.readSensor();
-      if (needTrigger == true && sensorReading > 0.6){
+      if (needTrigger == true && sensorReading > 0.5){
         digitalWrite(triggerPin, HIGH);
         delay(10);
         digitalWrite(triggerPin, LOW);
         needTrigger = false;
       }
-      Serial.print(sensorReading);
-      Serial.write(10);
+      else if (needTrigger == false) {
+        Serial.print(sensorReading);
+        Serial.write(10);
+      }
       delay(period);
     }
   }
