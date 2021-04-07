@@ -2,7 +2,7 @@
 VernierLib Vernier;
 
 int interval = 200; //defines the interval of each read from the sensor in ms
-float threshold = 0.6; //equates to the ideal threshold value
+float threshold = 1; //equates to the ideal threshold value
 float sensorReading;
 
 void setup() {

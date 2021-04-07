@@ -1,11 +1,10 @@
 #include "VernierLib.h"
-#define NUM_PARAMETERS 3
 #define BUFFER_SIZE 7
 
 int triggerPin = 13;
 
 int start = 0;
-int duration = 1000;
+int duration = 4500;
 int sampling_rate = 10;
 float period;
 VernierLib Vernier;
@@ -45,15 +44,17 @@ void loop() {
     }
     else {
       sensorReading = Vernier.readSensor();
-      if (needTrigger == true && sensorReading > 20){
+      if (needTrigger == true && sensorReading > 0.6){
         Serial.println("threshold hit");
         digitalWrite(triggerPin, HIGH);
         delay(10);
         digitalWrite(triggerPin, LOW);
         needTrigger = false;
       }
-      Serial.print(sensorReading);
-      Serial.write(10);
+      else if (needTrigger == false) {
+        Serial.print(sensorReading);
+        Serial.write(10);
+      }
       delay(period);
     }
   }
