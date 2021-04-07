@@ -25,7 +25,7 @@ clc; clear;
 subject_name = input('Enter subject name: ', 's');
 % folder_name = strcat('/Users/ze/Documents/Thakor Lab/ERP
 % experiment/data/', date, '/', subject_name); % Mac
-folder_name = strcat('C:\Users\keqin\OneDrive\Documents\GitHub\ERP-experiment\data\', datestr(now, 'yyyy/mm/dd'), '\', subject_name); % Windows
+folder_name = strcat('C:\Users\keqin\OneDrive\Documents\GitHub\ERP-experiment\data\', datestr(now, 'yyyy-mm-dd'), '\', subject_name); % Windows
 mkdir(folder_name);
 
 if exist('stimulator', 'var') == 0
