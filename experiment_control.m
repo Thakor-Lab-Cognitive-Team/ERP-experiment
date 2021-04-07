@@ -23,18 +23,22 @@ clc; clear;
 
 %% Connect to arduino stimulator and sensor
 subject_name = input('Enter subject name: ', 's');
-folder_name = strcat('/Users/ze/Documents/Thakor Lab/ERP experiment/data/', date, '/', subject_name);
+% folder_name = strcat('/Users/ze/Documents/Thakor Lab/ERP
+% experiment/data/', date, '/', subject_name); % Mac
+folder_name = strcat('C:\Users\keqin\OneDrive\Documents\GitHub\ERP-experiment\data\', datestr(now, 'yyyy/mm/dd'), '\', subject_name); % Windows
 mkdir(folder_name);
 
 if exist('stimulator', 'var') == 0
-    stimulator = serialport('/dev/cu.usbmodem14301', 9600);
+    % stimulator = serialport('/dev/cu.usbmodem14301', 9600); % Mac
+    stimulator = serialport('COM3', 9600); % Windows
     flush(stimulator);
     configureTerminator(stimulator, "LF");
 end
 
 
 if exist('sensor', 'var') == 0
-    sensor = serialport('/dev/cu.usbmodem142401', 9600);
+    % sensor = serialport('/dev/cu.usbmodem142401', 9600); % Mac
+    sensor = serialport('COM7', 9600);
     flush(sensor);
     sensor.UserData = struct("data",[],"count", 1);
     configureTerminator(sensor, "LF");
