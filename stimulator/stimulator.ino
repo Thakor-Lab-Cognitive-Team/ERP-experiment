@@ -1,4 +1,4 @@
-#define BUFFER_SIZE 16
+#define BUFFER_SIZE 20
 
 int stimulatorPin = 12; //pin used to stimulate the subject
 int triggerPins[3] = {8, 9, 10};
@@ -23,7 +23,9 @@ float t0;
 void setup() {
   Serial.begin(9600);
   pinMode(stimulatorPin, OUTPUT);
-  pinMode(triggerPin, OUTPUT);
+  for (int i = 0; i < 3; i++) {
+    pinMode(triggerPins[i], OUTPUT);
+  }
 }
 
 void loop() {
@@ -62,43 +64,43 @@ void loop() {
       case 1:
         digitalWrite(triggerPins[0], HIGH);
         delayMicroseconds(10);
-        digitalWrite(triggerPins[0], LOW
+        digitalWrite(triggerPins[0], LOW);
         needTrigger = false;
         break;
       case 2:
         digitalWrite(triggerPins[1], HIGH);
         delayMicroseconds(10);
-        digitalWrite(triggerPins[1], LOW
+        digitalWrite(triggerPins[1], LOW);
         needTrigger = false;
         break;
       case 3:
         digitalWrite(triggerPins[2], HIGH);
         delayMicroseconds(10);
-        digitalWrite(triggerPins[2], LOW
+        digitalWrite(triggerPins[2], LOW);
         needTrigger = false;
         break;
       case 4:
         digitalWrite(triggerPins[0], HIGH);
         digitalWrite(triggerPins[1], HIGH);
         delayMicroseconds(10);
-        digitalWrite(triggerPins[0], LOW
-        digitalWrite(triggerPins[1], LOW
+        digitalWrite(triggerPins[0], LOW);
+        digitalWrite(triggerPins[1], LOW);
         needTrigger = false;
         break;
       case 5:
         digitalWrite(triggerPins[0], HIGH);
         digitalWrite(triggerPins[2], HIGH);
         delayMicroseconds(10);
-        digitalWrite(triggerPins[0], LOW
-        digitalWrite(triggerPins[2], LOW
+        digitalWrite(triggerPins[0], LOW);
+        digitalWrite(triggerPins[2], LOW);
         needTrigger = false;
         break;
       case 6:
         digitalWrite(triggerPins[1], HIGH);
         digitalWrite(triggerPins[2], HIGH);
         delayMicroseconds(10);
-        digitalWrite(triggerPins[1], LOW
-        digitalWrite(triggerPins[2], LOW
+        digitalWrite(triggerPins[1], LOW);
+        digitalWrite(triggerPins[2], LOW);
         needTrigger = false;
         break;
     }
