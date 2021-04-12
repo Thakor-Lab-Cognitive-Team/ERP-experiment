@@ -166,6 +166,7 @@ legend('low', 'mid', 'high');
 
 %%
 % Save data
+save(strcat(folder_name, '/sensory_feedback_sequence.mat'), 'sequence');
 save(strcat(folder_name, '/sensory_feedback_stimulation.mat'), 'PW_sequence');
 save(strcat(folder_name, '/sensory_feedback_forces.mat'), 'forces');
 save(strcat(folder_name, '/sensory_feedback_average_forces.mat'), 'average_forces');
@@ -178,17 +179,17 @@ forces = cell(3, presentation);
 average_forces = cell(3, 1);
 
 % Generate pseudo-random sequence of stimulation
-sequence = [ones(2, presentation/6), 2*ones(2, presentation/6), 3*ones(2, presentation/6)];
-sequence = [sequence, randi(3, 2, presentation/2)];
-sequence(1, :) = sequence(1, randperm(presentation));
-sequence(2, :) = sequence(2, randperm(presentation));
-PW12_sequence = PW(sequence);
+sequence = nan(3, presentation);
+temp = [ones(2, presentation/6), 2*ones(2, presentation/6), 3*ones(2, presentation/6)];
+temp = [temp, randi(3, 2, presentation/2)];
+sequence(1, :) = temp(1, randperm(presentation));
+sequence(2, :) = temp(2, randperm(presentation));
 PW = [PW threshold+0.1 threshold+0.3 threshold+0.5];
-sequence = [ones(1, presentation/12), 2*ones(1, presentation/12), 3*ones(1, presentation/12)];
-sequence = [sequence, sequence+3];
-sequence = [sequence, randi(6, 1, presentation/2)];
-sequence = sequence(randperm(presentation));
-PW3_sequence(3, :) = PW(sequence);
+temp = [ones(1, presentation/12), 2*ones(1, presentation/12), 3*ones(1, presentation/12)];
+temp = [temp, sequence+3];
+temp = [temp, randi(6, 1, presentation/2)];
+sequence(3, :) = temp(randperm(presentation));
+PW_sequence = PW(sequence);
 
 % Block 1
 fprintf('Block 1: grip when there is a stimulation\n');
@@ -200,8 +201,8 @@ for i = 1:presentation
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
-    out(4) = PW12_sequence(1, i); % pulse width of stimulation in ms
-    out(5) = sequence(i); % trigger type
+    out(4) = PW_sequence(1, i); % pulse width of stimulation in ms
+    out(5) = sequence(1, i); % trigger type
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
@@ -226,8 +227,8 @@ for i = 1:presentation
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
-    out(4) = PW12_sequence(2, i); % pulse width of stimulation in ms
-    out(5) = sequence(i); % trigger type
+    out(4) = PW_sequence(2, i); % pulse width of stimulation in ms
+    out(5) = sequence(2, i); % trigger type
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
@@ -241,7 +242,7 @@ for j = 1:presentation
 end
 average_forces{2} = average_forces{2} / presentation;
 
-% Block 3
+%% Block 3
 fprintf('Block 3: grip according to stimulation intensity\n');
 pause;
 % Stimulation
@@ -251,8 +252,8 @@ for i = 1:presentation
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
-    out(4) = PW3_sequence(3, i); % pulse width of stimulation in ms
-    out(5) = sequence(i); % trigger type
+    out(4) = PW_sequence(3, i); % pulse width of stimulation in ms
+    out(5) = sequence(3, i); % trigger type
     write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
@@ -269,7 +270,7 @@ average_forces{3} = average_forces{3} / presentation;
 %% Save data
 save(strcat(folder_name, '/EEG_recording_forces.mat'), 'forces');
 save(strcat(folder_name, '/EEG_recording_average_forces.mat'), 'average_forces');
-save(strcat(folder_name, '/EEG_recording_stimulation12.mat'), 'PW12_sequence');
-save(strcat(folder_name, '/EEG_recording_stimulation3.mat'), 'PW3_sequence');
+save(strcat(folder_name, '/EEG_recording_stimulation.mat'), 'PW_sequence');
+save(strcat(folder_name, '/EEG_recording_sequence.mat'), 'sequence');
 
 fprintf('finished EEG recordings\n');
