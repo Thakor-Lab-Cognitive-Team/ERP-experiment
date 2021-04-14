@@ -66,9 +66,9 @@ fprintf('Experiment: ERP study with TENS and Vibration \n');
 %% 1. Sensory mapping
 presentation = 50; % number of presentations for each trial
 duration = 4; % duration of stimulation in sec
-delay = 1.5; % delay after stimulation in sec
+delay = 2; % delay after stimulation in sec
 freq = 2; % frequency in Hz
-PW = 2.5; % pulse width in ms
+PW = 2; % pulse width in ms
 jitter_max = 0.5;
 jitter_min = -0.5;
 
@@ -89,7 +89,7 @@ end
 fprintf('finished sensory mapping\n');
 
 %% 2. Threshold detection
-PW = [1.5 1.7 1.9 2.1 2.3];
+PW = [0.5 0.75 1 1.75 2];
 percentage = zeros(5, 1);
 presentation = 50;
 
@@ -202,14 +202,15 @@ forces = cell(3, presentation);
 average_forces = cell(3, 1);
 
 % Generate pseudo-random sequence of stimulation
+PW = [threshold threshold+0.5 threshold+1];
 sequence = nan(3, presentation);
 temp = [ones(2, presentation/6), 2*ones(2, presentation/6), 3*ones(2, presentation/6)];
 temp = [temp, randi(3, 2, presentation/2)];
 sequence(1, :) = temp(1, randperm(presentation));
 sequence(2, :) = temp(2, randperm(presentation));
-PW = [PW threshold+0.1 threshold+0.3 threshold+0.5];
+PW = [PW threshold+0.25 threshold+0.75 threshold+1.25];
 temp = [ones(1, presentation/12), 2*ones(1, presentation/12), 3*ones(1, presentation/12)];
-temp = [temp, sequence+3];
+temp = [temp, temp+3];
 temp = [temp, randi(6, 1, presentation/2)];
 sequence(3, :) = temp(randperm(presentation));
 PW_sequence = PW(sequence);
