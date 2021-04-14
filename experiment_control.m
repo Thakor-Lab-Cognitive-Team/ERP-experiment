@@ -69,7 +69,7 @@ duration = 4; % duration of stimulation in sec
 delay = 1.5; % delay after stimulation in sec
 freq = 2; % frequency in Hz
 PW = 2.5; % pulse width in ms
-jitter_max = 0,5;
+jitter_max = 0.5;
 jitter_min = -0.5;
 
 out = zeros(1, 5);
@@ -128,7 +128,6 @@ stim_counter = zeros(1, 3);
 presentation = 30;
 forces = cell(3, presentation);
 average_forces = cell(3, 1);
-delay = 1.5; % delay after stimulation in sec
 
 % Generate random sequence of stimulation
 sequence = randi(3, 1, presentation);
@@ -221,9 +220,9 @@ for j = 1:presentation
 end
 average_forces{1} = average_forces{1} / presentation;
 
+
 %% Block 2
 fprintf('Block 2: grip according to stimulation intensity\n');
-pause;
 % Stimulation
 for i = 1:presentation
     fprintf('\n%d of %d\r', i, presentation);
@@ -246,9 +245,9 @@ for j = 1:presentation
 end
 average_forces{2} = average_forces{2} / presentation;
 
+
 %% Block 3
 fprintf('Block 3: grip according to stimulation intensity\n');
-pause;
 % Stimulation
 for i = 1:presentation
     fprintf('\n%d of %d\r', i, presentation);
