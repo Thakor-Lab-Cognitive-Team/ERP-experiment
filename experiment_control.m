@@ -175,6 +175,7 @@ save(strcat(folder_name, '/sensory_feedback_average_forces.mat'), 'average_force
 
 fprintf('finished sensory feedback\n');
 
+
 %% 4. EEG recordings
 presentation = 120; % Must be multiples of 12
 forces = cell(3, presentation);
