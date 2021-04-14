@@ -83,7 +83,7 @@ for j = 1:presentation
     fprintf('\n%d of %d\r', j, presentation);
     write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
-    pause(duration + jitter);
+    pause(duration + delay + jitter);
 end
 
 fprintf('finished sensory mapping\n');
@@ -128,10 +128,15 @@ stim_counter = zeros(1, 3);
 presentation = 30;
 forces = cell(3, presentation);
 average_forces = cell(3, 1);
+dimension = 1;
+average_forces{1} = zeros(1, dimension);
+average_forces{2} = zeros(1, dimension);
+average_forces{3} = zeros(1, dimension);
 
 % Generate random sequence of stimulation
 sequence = randi(3, 1, presentation);
 PW_sequence = PW(sequence);
+
 
 for i = 1:presentation
     pointer = sequence(i);
@@ -147,7 +152,23 @@ for i = 1:presentation
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
     stim_counter(pointer) = stim_counter(pointer) + 1;
-    forces{pointer, stim_counter(pointer)} = sensor.UserData.data;
+    if isempty(sensor.UserData.data)
+        sensor.UserData.data = 0;
+end
+    dimension = max([dimension, length(sensor.UserData.data)]);
+    average_forces{pointer} = padarray(average_forces{pointer}, [0 dimension-length(average_forces{pointer})], 0, 'post');
+    forces{pointer, stim_counter(pointer)} = padarray(sensor.UserData.data, ...
+        [0 dimension-length(sensor.UserData.data)], 0, 'post');
+    average_forces{pointer} = average_forces{pointer} + forces{pointer, stim_counter(pointer)};
+    figure(2);
+    clf(2);
+    hold on;
+    yline(1);
+    plot(average_forces{1}./stim_counter(1), 'r');
+    plot(average_forces{2}./stim_counter(2), 'g');
+    plot(average_forces{3}./stim_counter(3), 'b');
+    legend('threshold', 'low', 'mid', 'high');
+    hold off;
 end
 
 %%
