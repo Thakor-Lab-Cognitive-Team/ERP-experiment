@@ -153,8 +153,8 @@ for i = 1:presentation
     pause(duration + delay + jitter);
     stim_counter(pointer) = stim_counter(pointer) + 1;
     if isempty(sensor.UserData.data)
-        sensor.UserData.data = 0;
-end
+		sensor.UserData.data = 0;
+	end
     dimension = max([dimension, length(sensor.UserData.data)]);
     average_forces{pointer} = padarray(average_forces{pointer}, [0 dimension-length(average_forces{pointer})], 0, 'post');
     forces{pointer, stim_counter(pointer)} = padarray(sensor.UserData.data, ...
@@ -185,6 +185,7 @@ for i =1:3
     plot(average_forces{i}, color(i));
 end
 legend('low', 'mid', 'high');
+hold off;
 
 %%
 % Save data
@@ -197,7 +198,7 @@ fprintf('finished sensory feedback\n');
 
 
 %% 4. EEG recordings
-presentation = 120; % Must be multiples of 12
+presentation = 120; % Must be multiples of 24
 forces = cell(3, presentation);
 average_forces = cell(3, 1);
 
@@ -208,13 +209,25 @@ temp = [ones(2, presentation/6), 2*ones(2, presentation/6), 3*ones(2, presentati
 temp = [temp, randi(3, 2, presentation/2)];
 sequence(1, :) = temp(1, randperm(presentation));
 sequence(2, :) = temp(2, randperm(presentation));
-PW = [PW threshold+0.25 threshold+0.75 threshold+1.25];
-temp = [ones(1, presentation/12), 2*ones(1, presentation/12), 3*ones(1, presentation/12)];
-temp = [temp, temp+3];
-temp = [temp, randi(6, 1, presentation/2)];
+PW = [PW threshold+1.25];
+temp = [ones(1, presentation/8), 2*ones(1, presentation/8), 3*ones(1, presentation/8), 4*ones(1, presentation/8)];
+temp = [temp, randi(4, 1, presentation/2)];
 sequence(3, :) = temp(randperm(presentation));
 PW_sequence = PW(sequence);
 
+%% Create Visual fixpoint
+figure('WindowState', 'fullscreen', ...
+       'MenuBar', 'none', ...
+       'ToolBar', 'none');
+ax = axes('Units','Normalize','Position',[0 0 1 1]);
+xlim([-1, 1]);
+ylim([-1, 1]);
+set(gca,'Color','k');
+set(gca,'TickLength',[0 0])
+hold on;
+plot([-0.03, 0.03], [0, 0], 'w', 'LineWidth', 5);
+plot([0, 0], [-0.05, 0.05], 'w', 'LineWidth', 5);
+hold off;
 
 %% Block 1
 fprintf('Block 1: grip when there is a stimulation\n');
@@ -233,6 +246,10 @@ for i = 1:presentation
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
     forces{1, i} = sensor.UserData.data;
+	if mod(i, 20) == 0
+		% rest
+		input('Please hit enter to continue: ');
+	end
 end
 
 dimension = max(cellfun('length', forces(1, :)));
@@ -259,6 +276,10 @@ for i = 1:presentation
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
     forces{2, i} = sensor.UserData.data;
+	if mod(i, 20) == 0
+		% rest
+		input('Please hit enter to continue: ');
+	end
 end
 dimension = max(cellfun('length', forces(2, :)));
 average_forces{2} = zeros(1, dimension);
@@ -284,6 +305,10 @@ for i = 1:presentation
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
     forces{3, i} = sensor.UserData.data;
+	if mod(i, 20) == 0
+		% rest
+		input('Please hit enter to continue: ');
+	end
 end
 dimension = max(cellfun('length', forces(3, :)));
 average_forces{3} = zeros(1, dimension);
