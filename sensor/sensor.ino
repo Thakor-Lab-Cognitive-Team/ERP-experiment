@@ -30,8 +30,8 @@ void loop() {
     
     if (start == 1) {
       t0 = millis();
+      needTrigger = true;
     }
-    needTrigger = true;
   }
 
   // make sure trigger pin is LOW
