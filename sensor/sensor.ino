@@ -38,6 +38,7 @@ void loop() {
   digitalWrite(triggerPin, LOW);
   
   if (start == 1) {
+
     if (millis() - t0 > duration) {
       start = 0;
       needTrigger = false;
@@ -52,7 +53,7 @@ void loop() {
         Serial.print(sensorReading);
         Serial.write(10);
       }
-      else {
+      else if (needTrigger == false) {
         Serial.print(sensorReading);
         Serial.write(10);
       }

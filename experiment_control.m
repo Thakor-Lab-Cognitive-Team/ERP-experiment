@@ -45,7 +45,7 @@ if exist('sensor', 'var') == 0
     configureCallback(sensor, "terminator", @readData);
     sensor_out = zeros(1, 3);
     sensor_out(1) = 1; % start flag for Arduino
-    sensor_out(2) = 3500; % length of sampling in millisec
+    sensor_out(2) = 4000; % length of sampling in millisec, one more second than trial duration
     sensor_out(3) = 100; % sampling_freq
 end
 
@@ -66,7 +66,7 @@ fprintf('Experiment: ERP study with TENS and Vibration \n');
 %% 1. Sensory mapping
 presentation = 50; % number of presentations for each trial
 duration = 3; % duration of stimulation in sec
-delay = 3; % delay after stimulation in sec
+delay = 2; % delay after stimulation in sec, one less second than actual delay
 freq = 2; % frequency in Hz
 PW = 4.25; % pulse width in ms
 jitter_max = 0.5;
@@ -128,10 +128,10 @@ stim_counter = zeros(1, 3);
 presentation = 30;
 forces = cell(3, presentation);
 average_forces = cell(3, 1);
-dimension = 1;
-average_forces{1} = zeros(1, dimension);
-average_forces{2} = zeros(1, dimension);
-average_forces{3} = zeros(1, dimension);
+dimension = ones(3, 1);
+average_forces{1} = zeros(1, dimension(1));
+average_forces{2} = zeros(1, dimension(2));
+average_forces{3} = zeros(1, dimension(3));
 
 % Generate random sequence of stimulation
 sequence = randi(3, 1, presentation);
@@ -150,6 +150,7 @@ for i = 1:presentation
     out(5) = sequence(i); % trigger type
     sensor.UserData = struct("data", [], "count", 1);
     write(sensor, sensor_out, 'uint16');
+    pause(1);
     write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
@@ -157,10 +158,10 @@ for i = 1:presentation
     if isempty(sensor.UserData.data)
 		sensor.UserData.data = 0;
 	end
-    dimension = max([dimension, length(sensor.UserData.data)]);
-    average_forces{pointer} = padarray(average_forces{pointer}, [0 dimension-length(average_forces{pointer})], 0, 'post');
+    dimension(pointer) = max([dimension(pointer), length(sensor.UserData.data)]);
+    average_forces{pointer} = padarray(average_forces{pointer}, [0 dimension(pointer)-length(average_forces{pointer})], 0, 'pre');
     forces{pointer, stim_counter(pointer)} = padarray(sensor.UserData.data, ...
-        [0 dimension-length(sensor.UserData.data)], 0, 'post');
+        [0 dimension(pointer)-length(sensor.UserData.data)], 0, 'pre');
     average_forces{pointer} = average_forces{pointer} + forces{pointer, stim_counter(pointer)};
     figure(2);
     clf(2);
@@ -175,46 +176,27 @@ for i = 1:presentation
 		force = forces(j, :);
 		emptyCells = cellfun(@isempty,force);
 		force(emptyCells) = [];
-		dimension = max(cellfun('length', force));
 		for t = 1:length(force)
-			force{t} = padarray(force{t}, [0 dimension-size(force{t},2)], 0, 'post');
+			force{t} = padarray(force{t}, [0 dimension(j)-size(force{t},2)], 0, 'pre');
 		end
 		force = cell2mat(force');
 		S = std(force);
-		x = 0:0.01:(length(average_forces{j})-1)/100;
+		x = 1:1:(length(average_forces{j}));
 		x2 = [x, fliplr(x)];
-		h = plot(x, average_forces{j}+S, 'Color', color(j), 'LineWidth', 2);
+		h = plot(x, average_forces{j}./stim_counter(j)+S, 'Color', color(j), 'LineWidth', 2);
 		h.Color(4) = 0.1;
-		inBetween = [average_forces{j}, fliplr(average_forces{j}+S)];
+		inBetween = [average_forces{j}./stim_counter(j), fliplr(average_forces{j}./stim_counter(j)+S)];
 		h = fill(x2, inBetween, color(j));
 		set(h,'facealpha',.1);
-		h = plot(x, average_forces{j}-S, 'Color', color(j), 'LineWidth', 2);
+		h = plot(x, average_forces{j}./stim_counter(j)-S, 'Color', color(j), 'LineWidth', 2);
 		h.Color(4) = 0.1;
-		inBetween = [average_forces{j}, fliplr(average_forces{j}-S)];
+		inBetween = [average_forces{j}./stim_counter(j), fliplr(average_forces{j}./stim_counter(j)-S)];
 		h = fill(x2, inBetween, color(j));
 		set(h,'facealpha',.1);
 	end
     hold off;
 end
 
-
-%%
-figure(3);
-hold on;
-color = ['r', 'g', 'b'];
-for i =1:3
-    dimension = max(cellfun('length', forces(i, :)));
-    average_forces{i} = zeros(1, dimension);
-    for j = 1:stim_counter(i)
-        average_forces{i} = average_forces{i} + padarray(forces{i, j}, [0 dimension-size(forces{i,j},2)], 0, 'post');
-    end
-    average_forces{i} = average_forces{i} / stim_counter(i);
-    plot(average_forces{i}, color(i));
-end
-legend('low', 'mid', 'high');
-hold off;
-
-%%
 % Save data
 save(strcat(folder_name, '/sensory_feedback_sequence.mat'), 'sequence');
 save(strcat(folder_name, '/sensory_feedback_stimulation.mat'), 'PW_sequence');
@@ -269,6 +251,7 @@ for i = 1:presentation
     out(5) = sequence(1, i); % trigger type
     sensor.UserData = struct("data", [], "count", 1);
     write(sensor, sensor_out, 'uint16');
+    pause(1);
     write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
@@ -282,7 +265,7 @@ end
 dimension = max(cellfun('length', forces(1, :)));
 average_forces{1} = zeros(1, dimension);
 for j = 1:presentation
-    average_forces{1} = average_forces{1} + padarray(forces{1, j}, [0 dimension-size(forces{1,j},2)], 0, 'post');
+    average_forces{1} = average_forces{1} + padarray(forces{1, j}, [0 dimension-size(forces{1,j},2)], 0, 'pre');
 end
 average_forces{1} = average_forces{1} / presentation;
 
@@ -299,6 +282,7 @@ for i = 1:72
     out(5) = sequence(2, i); % trigger type
     sensor.UserData = struct("data", [], "count", 1);
     write(sensor, sensor_out, 'uint16');
+    pause(1);
     write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
@@ -311,7 +295,7 @@ end
 dimension = max(cellfun('length', forces(2, :)));
 average_forces{2} = zeros(1, dimension);
 for j = 1:presentation
-    average_forces{2} = average_forces{2} + padarray(forces{2, j}, [0 dimension-size(forces{2,j},2)], 0, 'post');
+    average_forces{2} = average_forces{2} + padarray(forces{2, j}, [0 dimension-size(forces{2,j},2)], 0, 'pre');
 end
 average_forces{2} = average_forces{2} / presentation;
 
@@ -328,6 +312,7 @@ for i = 1:72
     out(5) = sequence(3, i); % trigger type
     sensor.UserData = struct("data", [], "count", 1);
     write(sensor, sensor_out, 'uint16');
+    pause(1);
     write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
@@ -340,7 +325,7 @@ end
 dimension = max(cellfun('length', forces(3, :)));
 average_forces{3} = zeros(1, dimension);
 for j = 1:presentation
-    average_forces{3} = average_forces{3} + padarray(forces{3, j}, [0 dimension-size(forces{3,j},2)], 0, 'post');
+    average_forces{3} = average_forces{3} + padarray(forces{3, j}, [0 dimension-size(forces{3,j},2)], 0, 'pre');
 end
 average_forces{3} = average_forces{3} / presentation;
 
