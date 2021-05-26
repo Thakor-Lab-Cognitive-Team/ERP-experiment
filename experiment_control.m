@@ -66,7 +66,7 @@ fprintf('Experiment: ERP study with TENS and Vibration \n');
 %% 1. Sensory mapping
 presentation = 50; % number of presentations for each trial
 duration = 3; % duration of stimulation in sec
-delay = 2.5; % delay after stimulation in sec
+delay = 3; % delay after stimulation in sec
 freq = 2; % frequency in Hz
 PW = 4.25; % pulse width in ms
 jitter_max = 0.5;
@@ -138,6 +138,8 @@ sequence = randi(3, 1, presentation);
 PW_sequence = PW(sequence);
 
 
+color = ['r', 'g', 'b'];
+
 for i = 1:presentation
     pointer = sequence(i);
     fprintf('\n%d of %d\r', i, presentation);
@@ -167,9 +169,34 @@ for i = 1:presentation
     plot(average_forces{1}./stim_counter(1), 'r');
     plot(average_forces{2}./stim_counter(2), 'g');
     plot(average_forces{3}./stim_counter(3), 'b');
-    legend('threshold', 'low', 'mid', 'high');
+    legend('threshold', 'low', 'mid', 'high', 'AutoUpdate', 'off');
+	
+	for j = 1:3
+		force = forces(j, :);
+		emptyCells = cellfun(@isempty,force);
+		force(emptyCells) = [];
+		dimension = max(cellfun('length', force));
+		for t = 1:length(force)
+			force{t} = padarray(force{t}, [0 dimension-size(force{t},2)], 0, 'post');
+		end
+		force = cell2mat(force');
+		S = std(force);
+		x = 0:0.01:(length(average_forces{j})-1)/100;
+		x2 = [x, fliplr(x)];
+		h = plot(x, average_forces{j}+S, 'Color', color(j), 'LineWidth', 2);
+		h.Color(4) = 0.1;
+		inBetween = [average_forces{j}, fliplr(average_forces{j}+S)];
+		h = fill(x2, inBetween, color(j));
+		set(h,'facealpha',.1);
+		h = plot(x, average_forces{j}-S, 'Color', color(j), 'LineWidth', 2);
+		h.Color(4) = 0.1;
+		inBetween = [average_forces{j}, fliplr(average_forces{j}-S)];
+		h = fill(x2, inBetween, color(j));
+		set(h,'facealpha',.1);
+	end
     hold off;
 end
+
 
 %%
 figure(3);
