@@ -45,7 +45,7 @@ if exist('sensor', 'var') == 0
     configureCallback(sensor, "terminator", @readData);
     sensor_out = zeros(1, 3);
     sensor_out(1) = 1; % start flag for Arduino
-    sensor_out(2) = 4500; % length of sampling in millisec
+    sensor_out(2) = 3500; % length of sampling in millisec
     sensor_out(3) = 100; % sampling_freq
 end
 
@@ -65,10 +65,10 @@ fprintf('Experiment: ERP study with TENS and Vibration \n');
 
 %% 1. Sensory mapping
 presentation = 50; % number of presentations for each trial
-duration = 4; % duration of stimulation in sec
-delay = 2; % delay after stimulation in sec
+duration = 3; % duration of stimulation in sec
+delay = 2.5; % delay after stimulation in sec
 freq = 2; % frequency in Hz
-PW = 2; % pulse width in ms
+PW = 4.25; % pulse width in ms
 jitter_max = 0.5;
 jitter_min = -0.5;
 
@@ -82,14 +82,14 @@ out(5) = 1; % trigger type
 for j = 1:presentation
     fprintf('\n%d of %d\r', j, presentation);
     write(stimulator, out, 'single');
-    jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
-    pause(duration + delay + jitter);
+    jitter = (jitter_max - 0) *rand() + 0;         %add some jitter to the delay between stimulation presentations
+    pause(duration + 0 + jitter);
 end
 
 fprintf('finished sensory mapping\n');
 
 %% 2. Threshold detection
-PW = [0.5 0.75 1 1.75 2];
+PW = [1.25 1.5 1.75 2 2.25];
 percentage = zeros(5, 1);
 presentation = 50;
 
@@ -123,7 +123,7 @@ fprintf('The threshold frequency is %d\n', threshold);
 fprintf('finished threshold detection\n');
 
 %% 3. Sensory feedback
-PW = [threshold threshold+0.5 threshold+1];
+PW = [threshold threshold+1 threshold+2.25];
 stim_counter = zeros(1, 3);
 presentation = 30;
 forces = cell(3, presentation);
@@ -147,8 +147,8 @@ for i = 1:presentation
     out(4) = PW_sequence(i); % pulse width of stimulation in ms   
     out(5) = sequence(i); % trigger type
     sensor.UserData = struct("data", [], "count", 1);
-    write(stimulator, out, 'single');
     write(sensor, sensor_out, 'uint16');
+    write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
     stim_counter(pointer) = stim_counter(pointer) + 1;
@@ -172,7 +172,7 @@ for i = 1:presentation
 end
 
 %%
-figure();
+figure(3);
 hold on;
 color = ['r', 'g', 'b'];
 for i =1:3
@@ -203,19 +203,19 @@ forces = cell(3, presentation);
 average_forces = cell(3, 1);
 
 % Generate pseudo-random sequence of stimulation
-PW = [threshold threshold+0.5 threshold+1];
+PW = [threshold threshold+1 threshold+2.25];
 sequence = nan(3, presentation);
 temp = [ones(2, presentation/6), 2*ones(2, presentation/6), 3*ones(2, presentation/6)];
 temp = [temp, randi(3, 2, presentation/2)];
 sequence(1, :) = temp(1, randperm(presentation));
 sequence(2, :) = temp(2, randperm(presentation));
-PW = [PW threshold+1.25];
+PW = [PW threshold+2.75];
 temp = [ones(1, presentation/8), 2*ones(1, presentation/8), 3*ones(1, presentation/8), 4*ones(1, presentation/8)];
 temp = [temp, randi(4, 1, presentation/2)];
 sequence(3, :) = temp(randperm(presentation));
 PW_sequence = PW(sequence);
 
-%% Create Visual fixpoint
+% Create Visual fixpoint
 figure('WindowState', 'fullscreen', ...
        'MenuBar', 'none', ...
        'ToolBar', 'none');
@@ -225,8 +225,8 @@ ylim([-1, 1]);
 set(gca,'Color','k');
 set(gca,'TickLength',[0 0])
 hold on;
-plot([-0.03, 0.03], [0, 0], 'w', 'LineWidth', 5);
-plot([0, 0], [-0.05, 0.05], 'w', 'LineWidth', 5);
+plot([-0.03, 0.03], [0.5, 0.5], 'w', 'LineWidth', 5);
+plot([0, 0], [0.45, 0.55], 'w', 'LineWidth', 5);
 hold off;
 
 %% Block 1
@@ -235,18 +235,18 @@ fprintf('Block 1: grip when there is a stimulation\n');
 % Stimulation
 for i = 1:presentation
     fprintf('\n%d of %d\r', i, presentation);
-    sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
     out(4) = PW_sequence(1, i); % pulse width of stimulation in ms
     out(5) = sequence(1, i); % trigger type
-    write(stimulator, out, 'single');
+    sensor.UserData = struct("data", [], "count", 1);
     write(sensor, sensor_out, 'uint16');
+    write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
     forces{1, i} = sensor.UserData.data;
-	if mod(i, 20) == 0
+	if mod(i, 30) == 0
 		% rest
 		input('Please hit enter to continue: ');
 	end
@@ -263,20 +263,20 @@ average_forces{1} = average_forces{1} / presentation;
 %% Block 2
 fprintf('Block 2: grip according to stimulation intensity\n');
 % Stimulation
-for i = 1:presentation
+for i = 1:72
     fprintf('\n%d of %d\r', i, presentation);
-    sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
     out(4) = PW_sequence(2, i); % pulse width of stimulation in ms
     out(5) = sequence(2, i); % trigger type
-    write(stimulator, out, 'single');
+    sensor.UserData = struct("data", [], "count", 1);
     write(sensor, sensor_out, 'uint16');
+    write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
     forces{2, i} = sensor.UserData.data;
-	if mod(i, 20) == 0
+	if mod(i, 30) == 0
 		% rest
 		input('Please hit enter to continue: ');
 	end
@@ -292,20 +292,20 @@ average_forces{2} = average_forces{2} / presentation;
 %% Block 3
 fprintf('Block 3: grip according to stimulation intensity\n');
 % Stimulation
-for i = 1:presentation
+for i = 1:72
     fprintf('\n%d of %d\r', i, presentation);
-    sensor.UserData = struct("data",[],"count", 1);
     out(1) = 1; % start flag for Arduino
     out(2) = duration; % length of stimulation in sec
     out(3) = freq; % frequency of pulse in Hz
     out(4) = PW_sequence(3, i); % pulse width of stimulation in ms
     out(5) = sequence(3, i); % trigger type
-    write(stimulator, out, 'single');
+    sensor.UserData = struct("data", [], "count", 1);
     write(sensor, sensor_out, 'uint16');
+    write(stimulator, out, 'single');
     jitter = (jitter_max - jitter_min) *rand() + jitter_min;         %add some jitter to the delay between stimulation presentations
     pause(duration + delay + jitter);
     forces{3, i} = sensor.UserData.data;
-	if mod(i, 20) == 0
+	if mod(i, 30) == 0
 		% rest
 		input('Please hit enter to continue: ');
 	end

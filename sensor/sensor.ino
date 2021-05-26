@@ -52,7 +52,7 @@ void loop() {
         Serial.print(sensorReading);
         Serial.write(10);
       }
-      else if (needTrigger == false) {
+      else {
         Serial.print(sensorReading);
         Serial.write(10);
       }
