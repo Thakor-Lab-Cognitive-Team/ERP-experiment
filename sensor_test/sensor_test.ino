@@ -4,7 +4,7 @@
 int triggerPin = 13;
 
 int start = 0;
-int duration = 3500;
+int duration = 10000;
 int sampling_rate = 100;
 float period;
 VernierLib Vernier;
@@ -47,13 +47,13 @@ void loop() {
       if (needTrigger == true && sensorReading > 1){
         Serial.println("threshold hit");
         digitalWrite(triggerPin, HIGH);
-        delay(10);
+        delayMicroseconds(10);
         digitalWrite(triggerPin, LOW);
-        needTrigger = false;
+        //needTrigger = false;
         Serial.print(sensorReading);
         Serial.write(10);
       }
-      else if (needTrigger == false) {
+      else {
         Serial.print(sensorReading);
         Serial.write(10);
       }

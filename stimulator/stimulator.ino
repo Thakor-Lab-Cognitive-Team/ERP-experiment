@@ -116,7 +116,6 @@ void loop() {
       digitalWrite(stimulatorPin, HIGH);
       delay(pw_floor);
       delayMicroseconds(pw_digit);
-      // busyDelayMicroseconds(pulse_width * 1000);
       digitalWrite(stimulatorPin, LOW);
       delayMicroseconds(rev_pw_digit);
       delay(period_floor - pw_ceil);

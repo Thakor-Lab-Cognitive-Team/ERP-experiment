@@ -38,6 +38,7 @@ void loop() {
   digitalWrite(triggerPin, LOW);
   
   if (start == 1) {
+
     if (millis() - t0 > duration) {
       start = 0;
       needTrigger = false;
