@@ -1,24 +1,23 @@
-%% import block 1 data
-eventinfo = EEG.EVENTLIST.eventinfo;
-binlabel = {eventinfo.binlabel}';
-time = [eventinfo.time]';
-
-%% event type
+%% Parameters
+folder_prefix = '/Users/ze/Documents/Thakor Lab/ERP experiment/data/';
+folder_names = {
+	'2021-05-28/AB03/';
+	'2021-07-13/AB04/';
+	};
 event_type = {'B1'; 'B2'; 'B3'; 'B4'};
-
-%% calculate reaction time for each stim type
+block = 3;
 bins = 4;
-rt2 = cell(bins, 1);
 
-for i = 1:length(time)
-	if ~isequal(binlabel{i}, '""')
-		for j = 1:bins
-			if contains(binlabel{i}, event_type{j})
-				rt2{j}(end+1) = time(i+1) - time(i);
-				break;
-			end
-		end
-	end
+%% Load data
+rt_collection = {};
+for k = 1:length(folder_names) 
+	load(strcat(folder_prefix, folder_names{k}, 'block', num2str(block), '_rt.mat'));
+	rt_collection(1:bins, end+1) = rt;
+end
+
+rt = cell(4, 1);
+for i = 1:bins
+	rt{i, 1} = cat(2, rt_collection{i, :});
 end
 
 %% mean and std
@@ -26,7 +25,7 @@ mean_rt = zeros(bins, 1);
 std_rt = zeros(bins, 1);
 
 for i = 1:bins
-	temp = rt2{i};
+	temp = rt{i};
 	mean_rt(i) = mean(temp);
 	std_rt(i) = std(temp);
 end
@@ -53,6 +52,45 @@ xlabel('Stim Type');
 ylabel('Reaction Time (ms)');
 ax = gca;
 ax.FontSize = 15;
+
+%% Linear Regression
+X = [];
+Y = [];
+for k = 1:length(folder_names) 
+	load(fullfile(folder_prefix, folder_names{k}, 'EEG_recording_stimulation.mat'));
+	PW = unique(PW_sequence(block, :));
+	for i = 1:bins
+		Y = [Y; rt_collection{i, k}'];
+		X = [X; ones(length(rt_collection{i, k}), 1)*PW(i)];
+	end
+end
+
+mdl = fitlm(X,Y, 'VarNames',{'Intensity','RT'})
+
+%% One-way ANOVA
+
+
+for k = 1:length(folder_names)
+	forces = forces_collection{k};
+	PW_sequence = PW_collection{k};
+	PW = unique(PW_sequence(block, :));
+	for i = 1:length(PW)
+		force = forces(block, PW_sequence(block, :) == PW(i));
+		emptyCells = cellfun(@isempty,force);
+		force(emptyCells) = [];
+		dimension = max(cellfun('length', force));
+		for j = 1:length(force)
+			force{j} = padarray(force{j}, [0 dimension-size(force{j},2)], 0, 'post');
+		end
+		force = cell2mat(force');
+		temp = mean(force(:, start:finish), 2);
+		y(144*(k-1)+(1:length(temp)), i) = temp;
+	end
+end
+
+[p,~,stats] = anova1(y);
+[results,means] = multcompare(stats,'CType','bonferroni');
+
 
 %% Two-way ANOVA
 
